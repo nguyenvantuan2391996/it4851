@@ -11,6 +11,7 @@ i = 0
 j = 1
 arr_frame = []
 arr_ratio = []
+max_des = 0
 ratiopre = 0
 rationext = 0
 
@@ -47,6 +48,11 @@ while (cap.isOpened()):
                 kp1, des1 = sift.detectAndCompute(gray1, None)
                 kp2, des2 = sift.detectAndCompute(gray2, None)
 
+                if len(des2) > len(des1):
+                    max_des = len(des2)
+                else:
+                    max_des = len(des1)
+
                 # Create BFMatcher object
                 bf = cv.BFMatcher()
 
@@ -61,6 +67,10 @@ while (cap.isOpened()):
                 gray2 = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
 
                 kp2, des2 = sift.detectAndCompute(gray2, None)
+
+                if len(des2) > max_des:
+                    max_des = len(des2)
+                    key_frame = frame
 
             if len(kp1) == 0 or len(kp2) == 0:
                 rationext = 0
@@ -80,14 +90,15 @@ while (cap.isOpened()):
             arr_frame.append(count)
             arr_ratio.append(abs(rationext - ratiopre))
 
-            if abs(rationext - ratiopre) > 0.069:
+            if abs(rationext - ratiopre) > 0.074:
 
                 if j == 0:
                     # create image red
                     img = Image.new('RGB', (60, 30), color='red')
                     img.save('./data/frame%d.png' % (count - 1))
 
-                    cv.imwrite("./keyframe/keyFrame%d.jpg" % i, frame)  # save frame as JPEG file
+                    cv.imwrite("./keyframe/keyFrame%d.jpg" % i, key_frame)  # save keyframe as JPEG file
+                    max_des = 0
                     i += 1
                     j += 1
                 else:
